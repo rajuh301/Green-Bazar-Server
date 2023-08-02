@@ -33,11 +33,11 @@ async function run() {
         // connection--------------------
         const usersCollection = client.db("green-bazar").collection("users");
         const productCollection = client.db("green-bazar").collection("product");
+        const CategoryCollection = client.db("green-bazar").collection("category");
 
         // connection--------------------
 
-        
-      
+
 
         const verifyAdmin = async (req, res, next) => {
             const email = req.decoded.email;
@@ -76,7 +76,6 @@ async function run() {
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
 
-
             const query = { email: email }
             const user = await usersCollection.findOne(query);
             const result = { admin: user?.roal === 'admin' }
@@ -89,7 +88,7 @@ async function run() {
             const filter = { _id: new ObjectId(id) }
             const updateDoc = {
                 $set: {
-                    roal: 'Admin'
+                    roal: 'admin'
                 },
             };
             const result = await usersCollection.updateOne(filter, updateDoc);
@@ -99,11 +98,58 @@ async function run() {
 
 
 
+        // Category Releted Api 
 
-// Product Releted api ------------
+        app.get('/category', async (req, res) => {
+            const result = await CategoryCollection.find().toArray();
+            res.send(result);
+        })
+
+
+
+        app.post('/addCategory', async (req, res) => {
+            const postCategory = req.body;
+            console.log(postCategory);
+
+            // Check if the category name already exists in the collection
+            CategoryCollection.findOne({ name: postCategory.name })
+                .then(existingCategory => {
+                    if (existingCategory) {
+                        return res.json({ message: 'Category already exists' });
+                    }
+
+                    // If the category name is unique, insert the data into the collection
+                    CategoryCollection.insertOne(postCategory)
+                        .then(result => {
+
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            res.status(500).json({ error: 'An error occurred while adding the category' });
+                        });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    res.status(500).json({ error: 'An error occurred while checking the category' });
+                });
+        });
+
+
+
+
+
+
+        // Product Releted api ------------
 
         app.get('/product', async (req, res) => {
             const result = await productCollection.find().toArray();
+            res.send(result);
+        })
+
+
+        app.post('/product', async (req, res) => {
+            const addProduct = req.body;
+            const result = await productCollection.insertOne(addProduct);
             res.send(result);
         })
 
@@ -114,9 +160,16 @@ async function run() {
             const result = await productCollection.findOne(query);
             console.log(result)
             res.send(result);
-
         });
-// Product Releted api ------------
+
+
+
+
+
+
+
+
+        // Product Releted api ------------
 
 
 
