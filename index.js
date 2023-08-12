@@ -34,6 +34,7 @@ async function run() {
         const usersCollection = client.db("green-bazar").collection("users");
         const productCollection = client.db("green-bazar").collection("product");
         const CategoryCollection = client.db("green-bazar").collection("category");
+        const buyCollection = client.db("green-bazar").collection("buyProduct");
 
         // connection--------------------
 
@@ -164,12 +165,30 @@ async function run() {
 
 
 
-
-
-
-
-
         // Product Releted api ------------
+
+
+
+        // Buy Releted Api -------------------
+
+        app.post('/buyProduct', async (req, res) => {
+            const addProduct = req.body;
+            const result = await buyCollection.insertOne(addProduct);
+            res.send(result);
+        })
+
+
+        app.get("/buyProduct/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await buyCollection.findOne(query);
+            console.log(result)
+            res.send(result);
+        });
+
+
+
+        // Buy Releted Api -------------------
 
 
 
